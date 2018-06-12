@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.example.muhammadfahad.readjs.StartActivity">
+
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/scrollView">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mobile_no"
+                android:fontFamily="serif"
+                android:id="@+id/textviewMob"
+                android:layout_alignBottom="@+id/editTextMob"
+                android:gravity="center_vertical"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true" />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="03XXXXXXXXX"
+                android:inputType="phone"
+                android:singleLine="true"
+                android:maxLength="11"
+                android:layout_marginLeft="20dp"
+                android:fontFamily="serif"
+                android:layout_toRightOf="@id/textviewMob"
+                android:layout_alignParentRight="true"
+                android:id="@+id/editTextMob" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/cnic_no"
+                android:layout_below="@id/textviewMob"
+                android:id="@+id/textviewCnic"
+                android:fontFamily="serif"
+                android:gravity="center_vertical"
+                android:layout_alignParentLeft="true"
+                android:layout_alignBottom="@+id/editTextCnic" />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="serif"
+                android:hint="42XXXXXXXXXXX"
+                android:inputType="number"
+                android:singleLine="true"
+                android:maxLength="13"
+                android:layout_below="@id/editTextMob"
+                android:layout_alignParentRight="true"
+                android:layout_alignLeft="@+id/editTextMob"
+                android:layout_alignStart="@+id/editTextMob"
+                android:id="@+id/editTextCnic" />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/channel_id"
+                android:layout_below="@id/textviewCnic"
+                android:id="@+id/textviewChannel"
+                android:fontFamily="serif"
+                android:gravity="center_vertical"
+                android:layout_alignParentLeft="true"
+                android:layout_alignBottom="@+id/editTextChannel" />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="serif"
+                android:hint="Test"
+                android:inputType="textCapSentences"
+                android:singleLine="true"
+                android:layout_below="@id/editTextCnic"
+                android:layout_alignParentRight="true"
+                android:layout_alignLeft="@+id/editTextMob"
+                android:layout_alignStart="@+id/editTextMob"
+                android:id="@+id/editTextChannel" />
+
+           <TextView
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:text="@string/income"
+               android:layout_below="@+id/textviewChannel"
+               android:id="@+id/textviewIncome"
+               android:fontFamily="serif"
+               android:gravity="center_vertical"
+               android:layout_alignParentLeft="true"
+               android:layout_alignLeft="@+id/editTextIncome"
+               android:layout_alignBottom="@+id/editTextIncome"
+               />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="serif"
+                android:hint="400000"
+                android:inputType="number"
+                android:singleLine="true"
+                android:id="@+id/editTextIncome"
+                android:layout_below="@id/editTextChannel"
+                android:layout_alignParentRight="true"
+                android:layout_alignLeft="@+id/editTextChannel"
+                android:layout_alignStart="@+id/editTextChannel"/>
+
+            <!--<TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ref1"
+                android:layout_below="@+id/textviewIncome"
+                android:fontFamily="serif"
+                android:gravity="center_vertical"
+                android:layout_alignParentLeft="true"
+                android:id="@+id/textviewRef1"
+                android:layout_alignLeft="@id/editTextRef1"
+                android:layout_alignBottom="@id/editTextRef1"
+                />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="serif"
+                android:hint="XXXXX"
+                android:inputType="text"
+                android:singleLine="true"
+                android:id="@+id/editTextRef1"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/editTextIncome"
+                android:layout_alignLeft="@+id/editTextIncome"
+                android:layout_alignStart="@+id/editTextIncome"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ref2"
+                android:layout_below="@+id/textviewRef1"
+                android:fontFamily="serif"
+                android:gravity="center_vertical"
+                android:layout_alignParentLeft="true"
+                android:id="@+id/textviewRef2"
+                android:layout_alignLeft="@+id/editTextRef2"
+                android:layout_alignBottom="@+id/editTextRef2"
+                />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="serif"
+                android:hint="XXXXX"
+                android:inputType="text"
+                android:singleLine="true"
+                android:id="@+id/editTextRef2"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/editTextRef1"
+                android:layout_alignLeft="@+id/editTextRef1"
+                android:layout_alignStart="@+id/editTextRef1"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ref3"
+                android:layout_below="@+id/textviewRef2"
+                android:fontFamily="serif"
+                android:gravity="center_vertical"
+                android:layout_alignParentLeft="true"
+                android:id="@+id/textviewRef3"
+                android:layout_alignLeft="@+id/editTextRef3"
+                android:layout_alignBottom="@+id/editTextRef3"
+                />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="serif"
+                android:hint="XXXXX"
+                android:inputType="text"
+                android:singleLine="true"
+                android:id="@+id/editTextRef3"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/editTextRef2"
+                android:layout_alignLeft="@+id/editTextRef2"
+                android:layout_alignStart="@+id/editTextRef2"/>-->
+        </RelativeLayout>
+    </ScrollView>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/submit"
+        android:layout_margin="20dp"
+        android:padding="10dp"
+        android:id="@+id/button"
+        android:singleLine="true"
+        android:layout_below="@id/scrollView"
+        android:layout_centerHorizontal="true" />
+</RelativeLayout>
