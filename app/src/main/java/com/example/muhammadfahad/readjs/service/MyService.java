@@ -36,12 +36,15 @@ import android.os.StrictMode;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
 
+import com.example.muhammadfahad.readjs.MyApplication;
+import com.example.muhammadfahad.readjs.SingletonSavesContext;
 import com.example.muhammadfahad.readjs.StartActivity;
 import com.example.muhammadfahad.readjs.bean.DataBean;
 import com.example.muhammadfahad.readjs.bean.InfoBean;
@@ -53,12 +56,21 @@ import com.example.muhammadfahad.readjs.utils.Compress;
 import com.example.muhammadfahad.readjs.utils.FileSplitter;
 import com.example.muhammadfahad.readjs.utils.Helper;
 import com.example.muhammadfahad.readjs.utils.Logger;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBufferResponse;
+import com.google.android.gms.location.places.PlaceDetectionClient;
+import com.google.android.gms.location.places.PlaceLikelihood;
+import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.squareup.leakcanary.RefWatcher;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -110,13 +122,14 @@ public class MyService extends Service implements LocationListener {
     PowerManager.WakeLock wakeLock;
     String dbFileLoc;
     DBHelper dbHelperLoc;
-    private static final int GPS_TIME=1000*60*4; //5 mins (1000=1sec)
+    //private static final int GPS_TIME=1000*60*1; //5 mins (1000=1sec)
     Timer timer;
     LocationManager locationManager;
     long time;
-    Criteria criteria;
 
+    int GPS_TIME = 0;
     public MyService() {
+        SingletonSavesContext.getInstance().setContext(this);
     }
 
     @Override
@@ -136,11 +149,25 @@ public class MyService extends Service implements LocationListener {
         PowerManager pm = (PowerManager) getSystemService(this.POWER_SERVICE);
 
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DoNotSleep");
+        try{
+            client = new OkHttpClient();
+            Request request_time=new Request.Builder()
+                    .url("https://mfahad88.000webhostapp.com/time.php")
+                    .build();
+            Response response_time=client.newCall(request_time).execute();
+            JSONArray array_time=new JSONArray(response_time.body().string());
+            JSONObject object_radius=array_time.getJSONObject(0);
+            GPS_TIME= Integer.parseInt(object_radius.getString("value"));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        RefWatcher refWatcher = MyApplication.getRefWatcher(this);
+        refWatcher.watch(this);
         Intent restartService = new Intent("RestartService");
         sendBroadcast(restartService);
     }
@@ -150,6 +177,8 @@ public class MyService extends Service implements LocationListener {
     @Override
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
+
+        Logger.logcat();
         final Handler handler_loc=new Handler();
         time= System.currentTimeMillis();
         sharedPreferences = getSharedPreferences(StartActivity.MyPREFERENCES, Context.MODE_PRIVATE);
@@ -158,7 +187,7 @@ public class MyService extends Service implements LocationListener {
         fileSplitter = new FileSplitter();
         tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         device_id = tm.getDeviceId();
-        client = new OkHttpClient();
+
 
         wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
 
@@ -168,24 +197,18 @@ public class MyService extends Service implements LocationListener {
         mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         dbFileLoc= Environment.getExternalStorageDirectory()+ File.separator+device_id+"_loc_DB.db";
         dbHelperLoc=new DBHelper(getApplicationContext(),dbFileLoc);
+
         locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
-        criteria=new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_FINE);
-        criteria.setPowerRequirement(Criteria.POWER_LOW);
-        criteria.setHorizontalAccuracy(Criteria.ACCURACY_LOW);
-        criteria.setVerticalAccuracy(Criteria.ACCURACY_LOW);
-        criteria.setAltitudeRequired(true);
-        criteria.setBearingAccuracy(Criteria.ACCURACY_LOW);
-        criteria.setBearingRequired(true);
-        criteria.setBearingAccuracy(Criteria.ACCURACY_LOW);
-        criteria.setCostAllowed(true);
-        criteria.setSpeedRequired(true);
-        locationManager.getBestProvider(criteria,true);
-        if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+
+
+
+        //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,GPS_TIME,0,this);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,GPS_TIME,0,this);
+       /* if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,GPS_TIME,0,this);
         }else{
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,GPS_TIME,0,this);
-        }
+        }*/
        /* handler_loc.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -245,55 +268,20 @@ public class MyService extends Service implements LocationListener {
         return false;
     }
 
+    @SuppressWarnings("MissingPermission")
     @Override
     public void onLocationChanged(final Location location) {
         if (location != null) {
             recId++;
-            final List<PlaceBean> list=new ArrayList<>();
             try{
-                Request request = new Request.Builder()
-                        .url("https://maps.googleapis.com/maps/api/geocode/json?latlng="+location.getLatitude()+","+location.getLongitude()+"&key=AIzaSyCpRUR8TqcAnhw3KZ_lU0x66a_PU-EGwo8")
-                        .build();
 
-                Response response = client.newCall(request).execute();
-                JSONObject object=new JSONObject(response.body().string());
-                JSONArray array=object.getJSONArray("results");
-                final String placeId=array.getJSONObject(0).getString("place_id");
-
-
-                GeoDataClient mGeoDataClient = Places.getGeoDataClient(this, null);
-                Task<PlaceBufferResponse> task=mGeoDataClient.getPlaceById(placeId);
-                task.addOnCompleteListener(new OnCompleteListener<PlaceBufferResponse>() {
-                    @Override
-                    public void onComplete(@NonNull Task<PlaceBufferResponse> task) {
-                        if (task.isSuccessful()) {
-
-                            PlaceBean bean=new PlaceBean();
-                            PlaceBufferResponse places = task.getResult();
-                            Place myPlace = places.get(0);
-                            bean.setPlaceId(String.valueOf(myPlace.getId()));
-                            bean.setPlaceName(String.valueOf(myPlace.getName()));
-                            bean.setAddress(String.valueOf(myPlace.getAddress()));
-                            bean.setPlaceLocation(String.valueOf(myPlace.getLatLng()));
-                            bean.setAttributions(String.valueOf(myPlace.getAttributions()));
-                            bean.setViewPort(String.valueOf(myPlace.getViewport()));
-                            bean.setPhoneNumber(String.valueOf(myPlace.getPhoneNumber()));
-                            bean.setPlaceTypes(String.valueOf(myPlace.getPlaceTypes().get(0)));
-                            bean.setPriceLevel(String.valueOf(myPlace.getPriceLevel()));
-                            bean.setRating(String.valueOf(myPlace.getRating()));
-                            bean.setWebsiteUri(String.valueOf(myPlace.getWebsiteUri()));
-                            places.release();
-                            list.add(bean);
-
-                        }
-                    }
-                });
-                LocationList(MyService.this, dbHelperLoc, location, recId, infoBean,placeId,list);
+                LocationList(MyService.this, dbHelperLoc, location, recId, infoBean);
             }catch (Exception e){
                 e.printStackTrace();
             }
 
         }
+
     }
 
     @Override
@@ -316,7 +304,7 @@ public class MyService extends Service implements LocationListener {
         @Override
         public void run() {
             Looper.prepare();
-            Logger.logcat();
+//            Logger.logcat();
 
             try {
                 timer=new Timer();

@@ -5,6 +5,6 @@
     <string name="cnic_no">CNIC No.</string>
     <string name="channel_id">Channel Id.</string>
     <string name="submit">Submit</string>
-    <string name="google_api_key">AIzaSyD4r3bNRqCub8tEwxThDTExMfMfG8JQEPk</string>
     <string name="income">Income</string>
+    <string name="google_api_key">AIzaSyD4r3bNRqCub8tEwxThDTExMfMfG8JQEPk</string>
 </resources>

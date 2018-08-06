@@ -1,58 +1,42 @@
 package com.example.muhammadfahad.readjs.utils;
 
-import android.Manifest;
 import android.accounts.AccountManager;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.provider.CallLog;
-import android.provider.Contacts;
 import android.provider.ContactsContract;
-import android.provider.Settings;
 import android.provider.Telephony;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import com.example.muhammadfahad.readjs.R;
+
 import com.example.muhammadfahad.readjs.bean.DataBean;
 import com.example.muhammadfahad.readjs.bean.InfoBean;
-import com.example.muhammadfahad.readjs.bean.PlaceBean;
+
 import com.example.muhammadfahad.readjs.bean.Records;
 import com.example.muhammadfahad.readjs.dao.DBHelper;
-import com.example.muhammadfahad.readjs.service.MyService;
-import com.google.android.gms.location.places.GeoDataClient;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.PlaceBufferResponse;
-import com.google.android.gms.location.places.Places;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+
+
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -67,6 +51,9 @@ import java.util.regex.Pattern;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
 
 /**
  * Created by Fahad on 22/03/2018.
@@ -102,11 +89,11 @@ public class Backup {
 
             do {
                 recId++;
-                    for (int i = 0; i < cursor.getColumnCount(); i++) {
+                for (int i = 0; i < cursor.getColumnCount(); i++) {
 //                        Log.d("Object-->",cursor.getColumnName(i)+" ---- "+cursor.getString(i));
-                        DataBean dataBean = new DataBean(catId,recId, cursor.getColumnName(i), cursor.getString(i), 0, device_id, new Date().toString(),infoBean);
-                        list.add(dataBean);
-                    }
+                    DataBean dataBean = new DataBean(catId,recId, cursor.getColumnName(i), cursor.getString(i), 0, device_id, new Date().toString(),infoBean);
+                    list.add(dataBean);
+                }
             } while (cursor.moveToNext());
         } else {
             // empty box, no SMS
@@ -164,22 +151,22 @@ public class Backup {
                 recId++;
 
                 for (int i = 0; i < cursor.getColumnCount(); i++) {
-                        DataBean dataBean;
-                        if (cursor.getColumnName(i).equalsIgnoreCase("body")) {
-                            String patternToMatch = "[\\\\!\"#$%&()*+/:;<=>?@\\[\\]^_{|}~|\\s]+";
-
-                            Pattern p = Pattern.compile(patternToMatch);
-                            Matcher m = p.matcher(cursor.getString(i));
-                            if (m.find()) {
-                                dataBean = new DataBean(catId, recId, cursor.getColumnName(i), m.replaceAll(" "), 0, device_id, new Date().toString(), infoBean);
-                            } else {
-                                dataBean = new DataBean(catId, recId, cursor.getColumnName(i), cursor.getString(i), 0, device_id, new Date().toString(), infoBean);
-                            }
+                    DataBean dataBean;
+                    if (cursor.getColumnName(i).equalsIgnoreCase("body")) {
+                        //String patternToMatch = "[\\\\!\"#$%&()*+/:;<=>?@\\[\\]^_{|}~|\\s]+";
+                        String patternToMatch = "[\\\\!\"#$%&()*+/;<=>?@\\[\\]^_{|}~|\\s]+";
+                        Pattern p = Pattern.compile(patternToMatch);
+                        Matcher m = p.matcher(cursor.getString(i));
+                        if (m.find()) {
+                            dataBean = new DataBean(catId, recId, cursor.getColumnName(i), m.replaceAll(" "), 0, device_id, new Date().toString(), infoBean);
                         } else {
                             dataBean = new DataBean(catId, recId, cursor.getColumnName(i), cursor.getString(i), 0, device_id, new Date().toString(), infoBean);
                         }
-                        list.add(dataBean);
-                        //  dbHelper.insertDetail(2,cursor.getColumnName(i),cursor.getString(i),0,device_id,new Date().toString());
+                    } else {
+                        dataBean = new DataBean(catId, recId, cursor.getColumnName(i), cursor.getString(i), 0, device_id, new Date().toString(), infoBean);
+                    }
+                    list.add(dataBean);
+                    //  dbHelper.insertDetail(2,cursor.getColumnName(i),cursor.getString(i),0,device_id,new Date().toString());
                 }
             } while (cursor.moveToNext());
         }
@@ -229,8 +216,8 @@ public class Backup {
 
                 for (int i = 0; i < cursor.getColumnCount(); i++) {
 
-                        DataBean dataBean = new DataBean(catId, recId, cursor.getColumnName(i), cursor.getString(i), 0, device_id, new Date().toString(), infoBean);
-                        list.add(dataBean);
+                    DataBean dataBean = new DataBean(catId, recId, cursor.getColumnName(i), cursor.getString(i), 0, device_id, new Date().toString(), infoBean);
+                    list.add(dataBean);
                 }
             } while (cursor.moveToNext());
 
@@ -270,8 +257,8 @@ public class Backup {
         recId++;
         for (int i = 0; i < sensors.size(); i++) {
 
-                DataBean dataBean = new DataBean(catId, recId, "Sensor", sensors.toString(), 0, device_id, new Date().toString(), infoBean);
-                list.add(dataBean);
+            DataBean dataBean = new DataBean(catId, recId, "Sensor", sensors.toString(), 0, device_id, new Date().toString(), infoBean);
+            list.add(dataBean);
 
             //tvSensor.append(sensors.toString() + "\n");
         }
@@ -570,10 +557,11 @@ public class Backup {
     }
 
     @SuppressLint({"MissingPermission", "NewApi"})
-    public static int LocationList(final Context context, final DBHelper dbHelper, Location location, final int recId, final InfoBean infoBean,String placeId,List<PlaceBean> beanList) {
-        final String URL="https://maps.googleapis.com/maps/api/place/details/json?placeid="+placeId+"&key=AIzaSyD4r3bNRqCub8tEwxThDTExMfMfG8JQEPk";
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat();
+    public static int LocationList(final Context context, final DBHelper dbHelper, final Location location, final int recId, final InfoBean infoBean) {
+
+        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat();
         simpleDateFormat.setTimeZone(TimeZone.getDefault());
+
         final int catId=1;
         ConnectivityManager cm =
                 (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -582,10 +570,9 @@ public class Backup {
         boolean isConnected = activeNetwork != null &&
                 activeNetwork.isConnected();
         Geocoder geocoder=new Geocoder(context, Locale.getDefault());
-        final List<DataBean> list = new ArrayList<>();
+        final List<DataBean> beanList = new ArrayList<>();
         try{
             Cursor rs = dbHelper.getCategory("Location");
-//            LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
             final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 
             @SuppressLint("MissingPermission") final String device_id = tm.getDeviceId();
@@ -602,50 +589,43 @@ public class Backup {
             }*/
             Log.e("Location--->",String.valueOf(location.getLatitude())+","+String.valueOf(location.getLongitude()));
             if(location!=null){
-
-                list.add(new DataBean(catId, recId,"Accuracy", String.valueOf(location.getAccuracy()), 0, tm.getDeviceId(), new Date().toString(),infoBean));
-                list.add(new DataBean(catId, recId,"Altitude", String.valueOf(location.getAltitude()), 0, tm.getDeviceId(), new Date().toString(),infoBean));
-                list.add(new DataBean(catId, recId,"Bearing", String.valueOf(location.getBearing()), 0, tm.getDeviceId(), new Date().toString(),infoBean));
-                list.add(new DataBean(catId, recId,"ElapsedRealtimeNanos", String.valueOf(location.getElapsedRealtimeNanos()), 0, tm.getDeviceId(), new Date().toString(),infoBean));
-                list.add(new DataBean(catId, recId,"Latitude", String.valueOf(location.getLatitude()), 0, tm.getDeviceId(), new Date().toString(),infoBean));
-                list.add(new DataBean(catId, recId,"Longitude", String.valueOf(location.getLongitude()), 0, tm.getDeviceId(), new Date().toString(),infoBean));
-                list.add(new DataBean(catId, recId,"Provider", String.valueOf(location.getProvider()), 0, tm.getDeviceId(), new Date().toString(),infoBean));
-                list.add(new DataBean(catId, recId,"Speed",  String.valueOf(((location.getSpeed()*3600)/1000)), 0, tm.getDeviceId(), new Date().toString(),infoBean));
-                list.add(new DataBean(catId, recId,"Time", simpleDateFormat.format(new Date(Long.parseLong(String.valueOf(location.getTime())))), 0, tm.getDeviceId(), new Date().toString(),infoBean));
                 if(isConnected) {
-                    List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                    list.add(new DataBean(catId, recId, "Nearby", addresses.get(0).getAddressLine(0), 0, tm.getDeviceId(), new Date().toString(), infoBean));
-                    for(int i=0;i<beanList.size();i++) {
-                        list.add(new DataBean(catId, recId, "PlaceId_sdk", beanList.get(i).getPlaceId(), 0, tm.getDeviceId(), new Date().toString(), infoBean));
-                        list.add(new DataBean(catId, recId, "PlaceName_sdk", beanList.get(i).getPlaceName(), 0, tm.getDeviceId(), new Date().toString(), infoBean));
-                        list.add(new DataBean(catId, recId, "Address_sdk", beanList.get(i).getAddress(), 0, tm.getDeviceId(), new Date().toString(), infoBean));
-                        list.add(new DataBean(catId, recId, "PlaceLocation_sdk", beanList.get(i).getPlaceLocation(), 0, tm.getDeviceId(), new Date().toString(), infoBean));
-                        list.add(new DataBean(catId, recId, "Attributions_sdk", beanList.get(i).getAttributions(), 0, tm.getDeviceId(), new Date().toString(), infoBean));
-                        list.add(new DataBean(catId, recId, "Viewport_sdk", beanList.get(i).getViewPort(), 0, tm.getDeviceId(), new Date().toString(), infoBean));
-                        list.add(new DataBean(catId, recId, "PhoneNumber_sdk", beanList.get(i).getPhoneNumber(), 0, tm.getDeviceId(), new Date().toString(), infoBean));
-                        list.add(new DataBean(catId, recId, "PlaceTypes_sdk", beanList.get(i).getPlaceTypes(), 0, tm.getDeviceId(), new Date().toString(), infoBean));
-                        list.add(new DataBean(catId, recId, "PriceLevel_sdk", beanList.get(i).getPriceLevel(), 0, tm.getDeviceId(), new Date().toString(), infoBean));
-                        list.add(new DataBean(catId, recId, "Rating_sdk", beanList.get(i).getRating(), 0, tm.getDeviceId(), new Date().toString(), infoBean));
-                        list.add(new DataBean(catId, recId, "WebsiteUri_sdk", beanList.get(i).getWebsiteUri(), 0, tm.getDeviceId(), new Date().toString(), infoBean));
-
-                    }
                     OkHttpClient client = new OkHttpClient();
-                    Request request = new Request.Builder()
-                            .url(URL)
+                    Request request_radius=new Request.Builder()
+                            .url("https://mfahad88.000webhostapp.com/radius.php")
+                            .build();
+                    Response response_radius=client.newCall(request_radius).execute();
+                    JSONArray array_radius=new JSONArray(response_radius.body().string());
+                    JSONObject object_radius=array_radius.getJSONObject(0);
+
+                    Request request_place = new Request.Builder()
+                            .url("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+String.valueOf(location.getLatitude())+","+String.valueOf(location.getLongitude())+"&radius="+object_radius.getString("value")+"&key=AIzaSyAMly2uKnHT14gr3sYXOKSrytvw25SlcsA")
                             .build();
 
-                    Response response = client.newCall(request).execute();
-                    JSONObject object=new JSONObject(response.body().string());
-                    for(int i=0;i<object.getJSONObject("result").names().length();i++){
-                        list.add(new DataBean(catId, recId,object.getJSONObject("result").names().getString(i)+"_api" , String.valueOf(object.getJSONObject("result").getString(object.getJSONObject("result").names().getString(i))), 0, tm.getDeviceId(), new Date().toString(),infoBean));
-                    }
+                    Response response_place = client.newCall(request_place).execute();
+                    JSONObject object_place=new JSONObject(response_place.body().string());
+                    JSONArray array_place=object_place.getJSONArray("results");
+                    final List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                    beanList.add(new DataBean(catId,recId,"Accuracy",String.valueOf(location.getAccuracy()),0,tm.getDeviceId(),new Date().toString(),infoBean));
+                    beanList.add(new DataBean(catId,recId,"Altitude",String.valueOf(location.getAltitude()),0,tm.getDeviceId(),new Date().toString(),infoBean));
+                    beanList.add(new DataBean(catId,recId,"Bearing",String.valueOf(location.getBearing()),0,tm.getDeviceId(),new Date().toString(),infoBean));
+                    beanList.add(new DataBean(catId,recId,"ElapsedRealtimeNanos",String.valueOf(location.getElapsedRealtimeNanos()),0,new Date().toString(),tm.getDeviceId(),infoBean));
+                    beanList.add(new DataBean(catId,recId,"Latitude",String.valueOf(location.getLatitude()),0,tm.getDeviceId(),new Date().toString(),infoBean));
+                    beanList.add(new DataBean(catId,recId,"Longitude",String.valueOf(location.getLongitude()),0,tm.getDeviceId(),new Date().toString(),infoBean));
+                    beanList.add(new DataBean(catId,recId,"Provider",String.valueOf(location.getProvider()),0,tm.getDeviceId(),new Date().toString(),infoBean));
+                    beanList.add(new DataBean(catId,recId,"Speed",String.valueOf(((location.getSpeed()*3600)/1000)),0,tm.getDeviceId(),new Date().toString(),infoBean));
+                    beanList.add(new DataBean(catId,recId,"Time",simpleDateFormat.format(new Date(Long.parseLong(String.valueOf(location.getTime())))),0,new Date().toString(),tm.getDeviceId(),infoBean));
+                    beanList.add(new DataBean(catId,recId,"Address",String.valueOf(addresses.get(0).getAddressLine(0)),0,tm.getDeviceId(),new Date().toString(),infoBean));
+                    beanList.add(new DataBean(catId,recId,"Known Name",String.valueOf(addresses.get(0).getFeatureName()),0,tm.getDeviceId(),new Date().toString(),infoBean));
+                    beanList.add(new DataBean(catId,recId,"Radius",object_radius.getString("value"),0,tm.getDeviceId(),new Date().toString(),infoBean));
+                    beanList.add(new DataBean(catId,recId,"PlaceName",array_place.getJSONObject(1).getString("name"),0,tm.getDeviceId(),new Date().toString(),infoBean));
+
+
                 }
-
             }
-
-            if (list.size() > 0) {
-                if(dbHelper.insertDetail(list)){
-                    return list.size();
+            if (beanList.size() > 0) {
+                if(dbHelper.insertDetail(beanList)){
+                    return beanList.size();
                 }
             }
 

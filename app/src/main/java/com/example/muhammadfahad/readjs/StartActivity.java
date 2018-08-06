@@ -40,14 +40,8 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
+
 import com.google.android.gms.location.places.GeoDataClient;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.PlaceBufferResponse;
-import com.google.android.gms.location.places.PlaceDetectionClient;
-import com.google.android.gms.location.places.PlaceFilter;
-import com.google.android.gms.location.places.PlaceLikelihood;
-import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
-import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -59,6 +53,7 @@ import com.karumi.dexter.listener.DexterError;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.PermissionRequestErrorListener;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+import com.squareup.leakcanary.RefWatcher;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -263,28 +258,30 @@ public class StartActivity extends AppCompatActivity {
 
 
 
-    public class AppAsync extends AsyncTask<Void,Void,Boolean>{
+    public class AppAsync extends AsyncTask<Void,Void,JSONObject>{
         final String URL=Helper.getConfigValue(getApplicationContext(),"api_url");
 
 
 
         @Override
-        protected Boolean doInBackground(Void... voids) {
-
+        protected JSONObject doInBackground(Void... voids) {
+            JSONObject object = null;
             OkHttpClient client = new OkHttpClient();
 
 
             Request request = new Request.Builder()
-                    .url(URL+"api/app")
+                    .url("http://mfahad88.000webhostapp.com/js/app.php")
                     .build();
 
             try {
                 Response response = client.newCall(request).execute();
                 JSONArray array=new JSONArray(response.body().string());
-                JSONObject object=array.getJSONObject(0);
-                if(!object.getString("appId").equalsIgnoreCase(BuildConfig.VERSION_NAME)){
-                    Log.e("URL---->",object.getString("url"));
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(object.getString("url"))));
+
+                object = array.getJSONObject(0);
+
+                if(!object.getString("AppId").equalsIgnoreCase(BuildConfig.VERSION_NAME)){
+//                    Log.e("URL---->",object.get("url"));
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(object.get("Url").toString())));
                     android.os.Process.killProcess(android.os.Process.myPid());
                 }
 
@@ -293,7 +290,16 @@ public class StartActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            return null;
+            return object;
         }
+
+        /*@Override
+        protected void onPostExecute(JSONObject jsonObject) {
+            try {
+                Toast.makeText(StartActivity.this, jsonObject.get("Url").toString(), Toast.LENGTH_SHORT).show();
+            } catch (JSONException e) {
+
+            }
+        }*/
     }
 }

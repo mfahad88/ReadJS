@@ -1,5 +1,6 @@
 package com.example.muhammadfahad.readjs.utils;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
@@ -17,6 +18,7 @@ import java.util.Properties;
 public class Helper {
     private static final String TAG = "Helper";
 
+    @SuppressLint("NewApi")
     public static String getConfigValue(Context context, String name) {
         Resources resources = context.getResources();
 
@@ -33,4 +35,17 @@ public class Helper {
 
         return null;
     }
+
+/*    public static void setCOnfigValue(Context context, String name){
+        Resources resources = context.getResources();
+
+        try {
+            InputStream rawResource = resources.openRawResource(R.raw.config);
+            Properties properties = new Properties();
+        } catch (Resources.NotFoundException e) {
+            Log.e(TAG, "Unable to find the config file: " + e.getMessage());
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to open config file.");
+        }
+    }*/
 }
