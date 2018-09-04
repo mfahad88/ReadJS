@@ -42,12 +42,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <meta-data
+       <!-- <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_api_key" />
 
         <meta-data android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
+            android:value="@integer/google_play_services_version" />-->
         <activity android:name=".StartActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

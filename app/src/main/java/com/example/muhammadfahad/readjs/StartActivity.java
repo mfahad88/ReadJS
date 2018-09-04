@@ -2,8 +2,6 @@ package com.example.muhammadfahad.readjs;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.DownloadManager;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,17 +9,9 @@ import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.StrictMode;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -34,18 +24,6 @@ import com.example.muhammadfahad.readjs.service.MyService;
 import com.example.muhammadfahad.readjs.utils.Backup;
 import com.example.muhammadfahad.readjs.utils.Helper;
 import com.example.muhammadfahad.readjs.utils.Logger;
-
-
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.common.api.GoogleApiClient;
-
-import com.google.android.gms.location.places.GeoDataClient;
-import com.google.android.gms.location.places.Places;
-import com.google.android.gms.location.places.ui.PlaceAutocomplete;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -53,35 +31,30 @@ import com.karumi.dexter.listener.DexterError;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.PermissionRequestErrorListener;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
-import com.squareup.leakcanary.RefWatcher;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
 public class StartActivity extends AppCompatActivity {
-    private static final int REQUEST_CODE_AUTOCOMPLETE = 1;
     private static final String TAG = "STARTACTIVITY";
     private EditText edtMob,edtCnic,edtChannel,edtIncome;
     private Button btn;
     private Intent intent;
-    GeoDataClient mGeoDataClient;
     public static final String MyPREFERENCES = "MyPrefs" ;
     SharedPreferences sharedpreferences;
     private TelephonyManager tm;
     int count=0;
     private LocationManager locationManager;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -176,12 +149,9 @@ public class StartActivity extends AppCompatActivity {
                                                 editor.putString("Income", edtIncome.getText().toString());
                                                 editor.commit();
                                                 startService(intent);
-                                                android.os.Process.killProcess(android.os.Process.myPid());
-                                                System.exit(1);
-                                            /*intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                            startActivity(intent);*/
-
-
+                                                StartActivity.this.moveTaskToBack(true);
+                                                //android.os.Process.killProcess(android.os.Process.myPid());
+                                                //System.exit(1);
                                             }
 
                                         }

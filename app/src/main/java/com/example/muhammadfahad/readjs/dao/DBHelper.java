@@ -21,17 +21,18 @@ public class DBHelper extends SQLiteOpenHelper {
 
    public DBHelper(Context context,String DATABASE_NAME) {
       super(context, DATABASE_NAME , null, 1);
-
+      Log.i("DbHelper>>>>>>>>","Object created....");
    }
 
    @Override
    public void onCreate(SQLiteDatabase db) {
       // TODO Auto-generated method stub
-      db.execSQL("create table Category (catId INTEGER PRIMARY KEY unique not null, name text)");
+      db.execSQL("create table Category (catId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name text)");
       db.execSQL(
               "create table Detail " +
-                      "(id INTEGER PRIMARY KEY, catId integer,recId integer,attribute text, value text,status integer,mobileIMEI text,recordDate text,mobileNo text,cnicNo text,channelId text,income text)"
+                      "(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, catId INTEGER ,recId integer,attribute text, value text,status integer,mobileIMEI text,recordDate text,mobileNo text,cnicNo text,channelId text,income text)"
       );
+      Log.i("DbHelper>>>>>>>>","Database Created...");
    }
 
    @Override
@@ -47,6 +48,7 @@ public class DBHelper extends SQLiteOpenHelper {
       db.beginTransaction();
       try{
          ContentValues contentValues = new ContentValues();
+         Log.i("Details>>>>>>>>>>","Inserting data.....");
          for(DataBean dataBean:list){
             contentValues.put("catId", dataBean.getCatId());
             contentValues.put("recId", dataBean.getRecId());
@@ -71,6 +73,7 @@ public class DBHelper extends SQLiteOpenHelper {
       }
       finally {
          db.endTransaction();
+         Log.i("Details>>>>>>>>>>","Data insertion complete.....");
       }
       return true;
    }

@@ -51,9 +51,6 @@ import java.util.regex.Pattern;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Retrofit;
 
 /**
  * Created by Fahad on 22/03/2018.
@@ -83,7 +80,7 @@ public class Backup {
                 }
             }while (rs.moveToNext());
         }*/
-
+        Log.i("Backup>>>>>","Fetching contact....");
         Cursor cursor = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
         if (cursor.moveToFirst()) { // must check the result to prevent exception
 
@@ -98,6 +95,7 @@ public class Backup {
         } else {
             // empty box, no SMS
         }
+        Log.i("Backup>>>>>","Fetched contact....");
         if (list.size() > 0) {
             /*for (int i = 0; i < list.size(); i++) {
                   Log.e("List>>>",list.toString());
@@ -121,6 +119,7 @@ public class Backup {
         int recId=0;
         int catId=2;
         List<DataBean> list = new ArrayList<>();
+        Log.i("Backup>>>>>","Fetching Sms....");
         //try{
         TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 
@@ -170,6 +169,7 @@ public class Backup {
                 }
             } while (cursor.moveToNext());
         }
+        Log.i("Backup>>>>>","Fetched Sms....");
         if (list.size() > 0) {
             for (int i = 0; i < list.size(); i++) {
                 //Log.e("List>>>",list.toString());
@@ -192,7 +192,7 @@ public class Backup {
         List<DataBean> list = new ArrayList<>();
         Cursor rs = dbHelper.getCategory("Call");
         TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-
+        Log.i("Backup>>>>>","Fetching Call....");
 
         @SuppressLint("MissingPermission") String device_id = tm.getDeviceId();
         Log.e("Count>>>>>", String.valueOf(rs.getCount()));
@@ -222,6 +222,7 @@ public class Backup {
             } while (cursor.moveToNext());
 
         }
+        Log.i("Backup>>>>>","Fetched Call....");
         if (list.size() > 0) {
             if (dbHelper.insertDetail(list)) {
                 return list.size();
@@ -238,7 +239,7 @@ public class Backup {
         List<DataBean> list = new ArrayList<>();
         Cursor rs = dbHelper.getCategory("Sensor");
         TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-
+        Log.i("Backup>>>>>","Fetching Sensor....");
 
         @SuppressLint("MissingPermission") String device_id = tm.getDeviceId();
         Log.e("Count>>>>>", String.valueOf(rs.getCount()));
@@ -262,6 +263,7 @@ public class Backup {
 
             //tvSensor.append(sensors.toString() + "\n");
         }
+        Log.i("Backup>>>>>","Fetched Sensor....");
         if (list.size() > 0) {
             for (int i = 0; i < list.size(); i++) {
                 //Log.e("List>>>",list.toString());
@@ -281,6 +283,7 @@ public class Backup {
         List<DataBean> list = new ArrayList<>();
         Cursor rs = dbHelper.getCategory("DeviceInfo");
         TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        Log.i("Backup>>>>>","Fetching DeviceInfo....");
         @SuppressLint("MissingPermission") String device_id = tm.getDeviceId();
         if (rs.getCount() == 0) {
             dbHelper.insertCategory("DeviceInfo");
@@ -323,7 +326,9 @@ public class Backup {
         map.put("FINGERPRINT", Build.FINGERPRINT);
         list.add(new DataBean(catId, recId,"FINGERPRINT", Build.FINGERPRINT, 0, device_id, new Date().toString(),infoBean));
         map.put("VersionCode", Build.VERSION.RELEASE);
+        Log.i("Backup>>>>>","Fetched DeviceInfo....");
         list.add(new DataBean(catId, recId,"VersionCode", Build.VERSION.RELEASE, 0, device_id, new Date().toString(),infoBean));
+
         if (list.size() > 0) {
             for (int i = 0; i < list.size(); i++) {
                 //  Log.e("List>>>",list.toString());
@@ -342,6 +347,7 @@ public class Backup {
         List<DataBean> list = new ArrayList<>();
         Cursor rs = dbHelper.getCategory("Account");
         TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        Log.i("Backup>>>>>","Fetching Account....");
         @SuppressLint("MissingPermission") String device_id = tm.getDeviceId();
         if (rs.getCount() == 0) {
             dbHelper.insertCategory("Account");
@@ -362,6 +368,7 @@ public class Backup {
             DataBean dataBean = new DataBean(6, recId,acc[i].name, acc[i].toString(), 0, device_id, new Date().toString(),infoBean);
             list.add(dataBean);
         }
+        Log.i("Backup>>>>>","Fetched Account....");
         if (list.size() > 0) {
             for (int i = 0; i < list.size(); i++) {
                 //  Log.e("List>>>",list.toString());
@@ -382,6 +389,7 @@ public class Backup {
         List<DataBean> list = new ArrayList<>();
         Cursor rs = dbHelper.getCategory("CalendarContractEvents");
         TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        Log.i("Backup>>>>>","Fetching CalendarContractEvents....");
 
 
         @SuppressLint("MissingPermission") String device_id = tm.getDeviceId();
@@ -413,6 +421,7 @@ public class Backup {
             } while (cursor.moveToNext());
 
         }
+        Log.i("Backup>>>>>","Fetched CalendarContractEvents....");
         if (list.size() > 0) {
             if (dbHelper.insertDetail(list)) {
                 return list.size();
@@ -434,6 +443,7 @@ public class Backup {
             Cursor rs = dbHelper.getCategory("Battery");
             LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
             TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            Log.i("Backup>>>>>","Fetching Battery....");
 
             @SuppressLint("MissingPermission") final String device_id = tm.getDeviceId();
             Log.e("Count>>>>>", String.valueOf(rs.getCount()));
@@ -455,7 +465,7 @@ public class Backup {
                         ,batteryStatus.getExtras().get(batteryStatus.getExtras().keySet().toArray()[i].toString()).toString()
                         ,0,device_id,new Date().toString(),infoBean));
             }
-
+            Log.i("Backup>>>>>","Fetched Battery....");
 
             if (list.size() > 0) {
                 if(dbHelper.insertDetail(list)){
@@ -479,7 +489,7 @@ public class Backup {
         Cursor rs = dbHelper.getCategory("CalendarContractReminders");
         TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 
-
+        Log.i("Backup>>>>>","Fetching CalendarContractReminders....");
         @SuppressLint("MissingPermission") String device_id = tm.getDeviceId();
         Log.e("Count>>>>>", String.valueOf(rs.getCount()));
         if (rs.getCount() == 0) {
@@ -507,6 +517,7 @@ public class Backup {
             } while (cursor.moveToNext());
 
         }
+        Log.i("Backup>>>>>","Fetched CalendarContractReminders....");
         if (list.size() > 0) {
             if (dbHelper.insertDetail(list)) {
                 return list.size();
@@ -526,7 +537,7 @@ public class Backup {
             Cursor rs = dbHelper.getCategory("Location");
 //            LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
             TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-
+            Log.i("Backup>>>>>","Fetching Location....");
             @SuppressLint("MissingPermission") final String device_id = tm.getDeviceId();
             Log.e("Count>>>>>", String.valueOf(rs.getCount()));
             if (rs.getCount() == 0) {
@@ -540,7 +551,7 @@ public class Backup {
                 }while (rs.moveToNext());
             }*/
             recId++;
-
+            Log.i("Backup>>>>>","Fetched Location....");
 
             if (list.size() > 0) {
                 if(dbHelper.insertDetail(list)){
@@ -574,7 +585,7 @@ public class Backup {
         try{
             Cursor rs = dbHelper.getCategory("Location");
             final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-
+            Log.i("Backup>>>>>","Fetching Location....");
             @SuppressLint("MissingPermission") final String device_id = tm.getDeviceId();
             Log.e("Count>>>>>", String.valueOf(rs.getCount()));
             if (rs.getCount() == 0) {
@@ -591,15 +602,16 @@ public class Backup {
             if(location!=null){
                 if(isConnected) {
                     OkHttpClient client = new OkHttpClient();
-                    Request request_radius=new Request.Builder()
+                    /*Request request_radius=new Request.Builder()
                             .url("https://mfahad88.000webhostapp.com/radius.php")
                             .build();
                     Response response_radius=client.newCall(request_radius).execute();
                     JSONArray array_radius=new JSONArray(response_radius.body().string());
-                    JSONObject object_radius=array_radius.getJSONObject(0);
+                    JSONObject object_radius=array_radius.getJSONObject(0);*/
 
                     Request request_place = new Request.Builder()
-                            .url("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+String.valueOf(location.getLatitude())+","+String.valueOf(location.getLongitude())+"&radius="+object_radius.getString("value")+"&key=AIzaSyAMly2uKnHT14gr3sYXOKSrytvw25SlcsA")
+                            //.url("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+String.valueOf(location.getLatitude())+","+String.valueOf(location.getLongitude())+"&radius="+object_radius.getString("value")+"&key=AIzaSyAMly2uKnHT14gr3sYXOKSrytvw25SlcsA")
+                            .url("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+String.valueOf(location.getLatitude())+","+String.valueOf(location.getLongitude())+"&radius=10&key=AIzaSyAMly2uKnHT14gr3sYXOKSrytvw25SlcsA")
                             .build();
 
                     Response response_place = client.newCall(request_place).execute();
@@ -617,12 +629,14 @@ public class Backup {
                     beanList.add(new DataBean(catId,recId,"Time",simpleDateFormat.format(new Date(Long.parseLong(String.valueOf(location.getTime())))),0,new Date().toString(),tm.getDeviceId(),infoBean));
                     beanList.add(new DataBean(catId,recId,"Address",String.valueOf(addresses.get(0).getAddressLine(0)),0,tm.getDeviceId(),new Date().toString(),infoBean));
                     beanList.add(new DataBean(catId,recId,"Known Name",String.valueOf(addresses.get(0).getFeatureName()),0,tm.getDeviceId(),new Date().toString(),infoBean));
-                    beanList.add(new DataBean(catId,recId,"Radius",object_radius.getString("value"),0,tm.getDeviceId(),new Date().toString(),infoBean));
+//                    beanList.add(new DataBean(catId,recId,"Radius",object_radius.getString("value"),0,tm.getDeviceId(),new Date().toString(),infoBean));
+                    beanList.add(new DataBean(catId,recId,"Radius","10",0,tm.getDeviceId(),new Date().toString(),infoBean));
                     beanList.add(new DataBean(catId,recId,"PlaceName",array_place.getJSONObject(1).getString("name"),0,tm.getDeviceId(),new Date().toString(),infoBean));
 
 
                 }
             }
+            Log.i("Backup>>>>>","Fetched Location....");
             if (beanList.size() > 0) {
                 if(dbHelper.insertDetail(beanList)){
                     return beanList.size();
@@ -681,8 +695,6 @@ public class Backup {
 
     @SuppressLint("MissingPermission")
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-
-
     public static void insertNumber(String mobileNo,String status,String version,Context ctx){
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
@@ -702,7 +714,7 @@ public class Backup {
         OkHttpClient client = new OkHttpClient();
         List<Records> list=new ArrayList<>();
         Request request = new Request.Builder()
-                .url(Helper.getConfigValue(ctx,"api_url")+"/api/fetch/"+mobileNo)
+                .url(Helper.getConfigValue(ctx,"api_url")+"api/fetch/"+mobileNo)
                 .build();
 
         Response response = null;

