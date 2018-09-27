@@ -1,0 +1,63 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 24
+    buildToolsVersion "27.0.3"
+
+    defaultConfig {
+        applicationId "com.example.muhammadfahad.readjs"
+        minSdkVersion 16
+        targetSdkVersion 24
+        versionCode 1
+        versionName "2.5"
+        multiDexEnabled true
+
+    }
+    configurations {
+        all*.exclude group: 'org.apache.commons'
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:24.2.1'
+    //    compile 'com.squareup.okhttp3:okhttp:3.3.1'
+    compile 'com.karumi:dexter:4.2.0'
+    compile 'com.android.support:multidex:1.0.1'
+    compile 'com.squareup.retrofit2:retrofit:2.4.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.4.0'
+    compile 'org.apache.commons:commons-compress:1.18'
+    //    compile "org.apache.poi:poi-ooxml:3.17"
+    //        compile 'org.apache.poi:poi-ooxml:3.9'
+    //        compile 'org.apache.poi:poi-ooxml-schemas:3.9'
+    //        compile 'org.apache.xmlbeans:xmlbeans:2.3.0'
+    //        compile 'org.apache.poi:poi:3.9'
+    //    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.9'
+    //        compile 'dom4j:dom4j:1.6.1'
+    //    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.6'
+    //    compile group: 'org.apache.poi', name: 'poi', version: '3.9'
+    //    compile 'com.squareup.retrofit2:retrofit:2.4.0'
+    //    compile 'org.apache.poi:poi:3.9'
+    //    compile 'com.squareup.retrofit2:converter-gson:2.4.0'
+    //    compile 'com.google.android.gms:play-services:11.0.4'
+    /*compile 'com.google.android.gms:play-services-maps:11.2.0'
+                                    compile 'com.google.android.gms:play-services-places:11.2.0'
+                                    compile 'com.google.android.gms:play-services:11.2.0'
+                                    compile 'com.google.android.gms:play-services-location:11.2.0'
+                                    compile 'com.android.support:multidex:1.0.1'*/
+    //    compile 'com.google.android.gms:play-services-location:11.6.0'
+    //    compile 'com.google.android.gms:play-services-places:11.6.0'
+    //    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.4'
+    //    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+    //    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+//    compile files('libs/commons-compress-1.18.jar')
+    compile files('libs/xz-1.8.jar')
+
+}

@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">ReadJS</string>
+    <string name="title_activity_start">StartActivity</string>
+    <string name="mobile_no">Mobile No.</string>
+    <string name="cnic_no">CNIC No.</string>
+    <string name="channel_id">Channel Id.</string>
+    <string name="submit">Submit</string>
+    <string name="income">Income</string>
+    <string name="google_api_key">AIzaSyD4r3bNRqCub8tEwxThDTExMfMfG8JQEPk</string>
+</resources>
